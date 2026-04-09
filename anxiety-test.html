@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тест тревожности</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+color:white;
+padding:40px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+}
+
+.instructions{
+background:#1e1e1e;
+padding:20px;
+border-radius:10px;
+margin-bottom:25px;
+line-height:1.6;
+}
+
+.progress{
+text-align:center;
+margin-bottom:20px;
+opacity:0.8;
+}
+
+.question{
+background:#1e1e1e;
+padding:25px;
+border-radius:10px;
+margin-bottom:20px;
+font-size:18px;
+}
+
+.answers{
+text-align:center;
+}
+
+.answers button{
+margin:8px;
+padding:10px 18px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#333;
+color:white;
+font-size:16px;
+}
+
+.answers button.selected{
+background:#4caf50;
+}
+
+.nav{
+display:flex;
+justify-content:center;
+gap:60px;
+margin-top:20px;
+}
+
+.nav button{
+padding:10px 22px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#444;
+color:white;
+}
+
+.result{
+display:none;
+text-align:center;
+margin-top:30px;
+}
+
+.card{
+background:#1e1e1e;
+padding:40px;
+border-radius:12px;
+display:inline-block;
+}
+
+.score{
+font-size:36px;
+margin:15px 0;
+}
+
+.date{
+margin-top:10px;
+opacity:0.8;
+}
+
+.share{
+margin-top:18px;
+opacity:0.7;
+font-size:14px;
+display:none;
+}
+
+.download{
+margin-top:20px;
+padding:12px 20px;
+border:none;
+border-radius:8px;
+background:#4caf50;
+color:white;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Тест тревожности</h1>
+
+<div class="instructions">
+
+Отметьте, насколько каждый из перечисленных симптомов беспокоил вас в течение последней недели
+
+<br><br>
+
+0 — ни разу<br>
+1 — иногда<br>
+2 — умеренно<br>
+3 — часто
+
+</div>
+
+<div id="test">
+
+<div class="progress" id="progress"></div>
+
+<div class="question" id="question"></div>
+
+<div class="answers" id="answers"></div>
+
+<div class="nav">
+<button onclick="prev()">Назад</button>
+<button onclick="next()">Далее</button>
+</div>
+
+</div>
+
+<div class="result" id="result">
+
+<div class="card" id="card">
+
+<h2>Тест тревожности</h2>
+
+<div class="score" id="score"></div>
+
+<div id="interpretation"></div>
+
+<div class="date" id="date"></div>
+
+<div class="share" id="share">Пройти тест: https://t.me/seledka_v_korone</div>
+
+</div>
+
+<br>
+
+<button class="download" onclick="downloadPNG()">Скачать PNG</button>
+
+</div>
+
+</div>
+
+<script>
+
+const questions=[
+
+"Тревога, нервозность, беспокойство или страх",
+"Все вокруг кажется странным или нереальным",
+"Ощущение отстраненности от тела",
+"Внезапные приступы паники",
+"Предчувствие беды",
+"Напряженность или ощущение что вы «на грани»",
+"Трудности с концентрацией",
+"Мысли скачут с одной на другую",
+"Пугающие фантазии или навязчивые мысли",
+"Ощущение потери контроля",
+"Страх сойти с ума",
+"Страх потерять сознание",
+"Страх серьёзной болезни или смерти",
+"Страх выглядеть глупо перед другими",
+"Страх одиночества",
+"Страх критики",
+"Страх что случится что-то ужасное",
+"Учащённое сердцебиение",
+"Давление или боль в груди",
+"Онемение или покалывание",
+"Дискомфорт в животе",
+"Проблемы с пищеварением",
+"Чувство беспокойства",
+"Напряжение в мышцах",
+"Повышенная потливость",
+"Комок в горле",
+"Дрожь",
+"Слабость в ногах",
+"Головокружение",
+"Ощущение нехватки воздуха",
+"Боль в голове или шее",
+"Приливы жара или озноба",
+"Сильная усталость"
+
+];
+
+let index=0;
+let responses=new Array(questions.length).fill(null);
+
+function render(){
+
+document.getElementById("progress").innerText="Вопрос "+(index+1)+" из "+questions.length;
+
+document.getElementById("question").innerText=questions[index];
+
+let answers=document.getElementById("answers");
+
+answers.innerHTML="";
+
+for(let i=0;i<=3;i++){
+
+let btn=document.createElement("button");
+
+btn.innerText=i;
+
+if(responses[index]===i) btn.classList.add("selected");
+
+btn.onclick=()=>{
+responses[index]=i;
+render();
+};
+
+answers.appendChild(btn);
+
+}
+
+}
+
+function next(){
+
+if(index<questions.length-1){
+index++;
+render();
+}
+else{
+finish();
+}
+
+}
+
+function prev(){
+
+if(index>0){
+index--;
+render();
+}
+
+}
+
+function finish(){
+
+let score=responses.reduce((a,b)=>a+b,0);
+
+let text="";
+
+if(score<=4) text="Минимальная тревожность";
+else if(score<=10) text="Пограничная тревожность";
+else if(score<=20) text="Слабая тревожность";
+else if(score<=30) text="Умеренная тревожность";
+else if(score<=50) text="Высокая тревожность";
+else text="Очень высокая тревожность";
+
+document.getElementById("test").style.display="none";
+document.getElementById("result").style.display="block";
+
+document.getElementById("score").innerText=score+" из 99";
+document.getElementById("interpretation").innerText=text;
+
+let today=new Date();
+
+let formatted=
+String(today.getDate()).padStart(2,'0')+'.'+
+String(today.getMonth()+1).padStart(2,'0')+'.'+
+today.getFullYear();
+
+document.getElementById("date").innerText="Дата прохождения: "+formatted;
+
+}
+
+function downloadPNG(){
+
+let share=document.getElementById("share");
+share.style.display="block";
+
+html2canvas(document.getElementById("card")).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="rezultat-testa.png";
+link.href=canvas.toDataURL();
+
+link.click();
+
+share.style.display="none";
+
+});
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
